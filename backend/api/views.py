@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .cv_extractor import extract_cv_info
+from .job_analyzer import analyze_job_description
 import json
 import os
 from django.conf import settings
@@ -59,6 +60,24 @@ class CVExtractorView(APIView):
             logger.error(f"Error in CV extraction: {str(e)}")
             if os.path.exists(file_path):
                 os.remove(file_path)  # Ensure file is removed even if an error occurs
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class JobAnalyzerView(APIView):
+    def post(self, request):
+        job_description = request.data.get("job_description")
+        if not job_description:
+            return Response(
+                {"error": "No job description provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            analysis_result = analyze_job_description(job_description)
+            return Response(json.loads(analysis_result), status=status.HTTP_200_OK)
+        except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
