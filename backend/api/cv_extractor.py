@@ -46,7 +46,7 @@ def extract_cv_info(file_path):
         with open(file_path, "r") as file:
             text = file.read()
 
-    model = genai.GenerativeModel("gemini-1.5-pro")
+    model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""
     Extract the following information from the CV text below:
     - Name

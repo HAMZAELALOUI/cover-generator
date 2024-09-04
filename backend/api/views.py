@@ -7,6 +7,7 @@ import json
 import os
 from django.conf import settings
 import logging
+from .cover_letter_generator import generate_cover_letter
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,28 @@ class JobAnalyzerView(APIView):
             analysis_result = analyze_job_description(job_description)
             return Response(json.loads(analysis_result), status=status.HTTP_200_OK)
         except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class GenerateCoverLetterView(APIView):
+    def post(self, request):
+        cv_info = request.data.get("cv_info")
+        job_analysis = request.data.get("job_analysis")
+        language = request.data.get("language", "English")
+
+        if not cv_info or not job_analysis:
+            return Response(
+                {"error": "CV info and job analysis are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            cover_letter = generate_cover_letter(cv_info, job_analysis, language)
+            return Response(json.loads(cover_letter), status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error in cover letter generation: {str(e)}")
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
