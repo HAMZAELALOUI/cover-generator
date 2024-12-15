@@ -30,7 +30,52 @@ cover_letter_template = PromptTemplate(
 
     Language: {language}
 
-    Please create a well-structured cover letter that highlights the candidate's relevant skills and experience for the job. The cover letter should be written in {language}.
+    Please create a compelling cover letter following these specific guidelines:
+
+    1. Format:
+       - Professional business letter format
+       - Current date at the top
+       - Proper salutation (if recruiter name is known, use it; otherwise, use "Dear Hiring Manager")
+       - 3-4 concise paragraphs
+       - Professional closing
+
+    2. First Paragraph:
+       - Strong opening hook
+       - Mention the specific position you're applying for
+       - Brief introduction about yourself
+       - Show enthusiasm for the role and company
+
+    3. Second Paragraph:
+       - Focus on matching your skills with job requirements
+       - Highlight relevant projects and experiences
+       - Use specific examples and achievements
+       - Address any potential gaps or mismatches proactively
+       - Emphasize transferable skills
+
+    4. Third Paragraph:
+       - Explain why you're interested in this specific company
+       - Show knowledge of the company/industry
+       - Demonstrate cultural fit
+       - Mention relevant certifications or continuous learning
+
+    5. Closing Paragraph:
+       - Express enthusiasm for an interview
+       - Include your contact information
+       - Thank them for their consideration
+       - Professional signature
+
+    Style Guidelines:
+    - Tone: Professional yet enthusiastic
+    - Length: 300-400 words
+    - Format: Clear paragraphs with proper spacing
+    - Focus on achievements and potential value
+    - Be specific and quantify achievements where possible
+    - Address any experience gaps positively
+    - Highlight relevant technical skills and projects
+
+    The cover letter should be written in {language} and maintain a professional, confident tone while showing genuine interest in the position.
+    
+    Important: If the candidate's experience doesn't exactly match the job requirements, focus on potential, relevant projects, and transferable skills.
     """,
 )
 

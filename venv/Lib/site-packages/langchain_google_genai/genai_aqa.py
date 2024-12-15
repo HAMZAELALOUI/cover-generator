@@ -9,9 +9,9 @@ https://developers.generativeai.google/guide
 from typing import Any, List, Optional
 
 import google.ai.generativelanguage as genai
-from langchain_core.pydantic_v1 import BaseModel, PrivateAttr
 from langchain_core.runnables import RunnableSerializable
 from langchain_core.runnables.config import RunnableConfig
+from pydantic import BaseModel, PrivateAttr
 
 from . import _genai_extension as genaix
 
@@ -117,7 +117,7 @@ class GenAIAqa(RunnableSerializable[AqaInput, AqaOutput]):
         self._client = _AqaModel(**kwargs)
 
     def invoke(
-        self, input: AqaInput, config: Optional[RunnableConfig] = None
+        self, input: AqaInput, config: Optional[RunnableConfig] = None, **kwargs: Any
     ) -> AqaOutput:
         """Generates a grounded response using the provided passages."""
 

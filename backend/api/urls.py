@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CVExtractorView, JobAnalyzerView, GenerateCoverLetterView
+from .views import CVExtractorView, JobAnalyzerView, GenerateCoverLetterView, JobGapAnalyzerView, CVCrafterView
 
 urlpatterns = [
     path("extract-cv/", CVExtractorView.as_view(), name="extract-cv"),
@@ -9,4 +9,6 @@ urlpatterns = [
         GenerateCoverLetterView.as_view(),
         name="generate-cover-letter",
     ),
+    path("analyze-gap/", JobGapAnalyzerView.as_view(), name="analyze-gap"),
+    path("craft-cv/", CVCrafterView.as_view(), name="craft-cv"),
 ]

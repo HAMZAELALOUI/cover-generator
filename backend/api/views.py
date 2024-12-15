@@ -8,6 +8,9 @@ import os
 from django.conf import settings
 import logging
 from .cover_letter_generator import generate_cover_letter
+from .job_gap_analyzer import analyze_job_gap
+from .cv_crafter import craft_tailored_cv
+from .job_match_finder import find_matching_jobs
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +104,71 @@ class GenerateCoverLetterView(APIView):
             return Response(json.loads(cover_letter), status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error in cover letter generation: {str(e)}")
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class JobGapAnalyzerView(APIView):
+    def post(self, request):
+        cv_info = request.data.get("cv_info")
+        job_analysis = request.data.get("job_analysis")
+
+        if not cv_info or not job_analysis:
+            return Response(
+                {"error": "CV info and job analysis are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            gap_analysis = analyze_job_gap(cv_info, job_analysis)
+            return Response(json.loads(gap_analysis), status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error in gap analysis: {str(e)}")
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CVCrafterView(APIView):
+    def post(self, request):
+        original_cv = request.data.get("original_cv")
+        job_description = request.data.get("job_description")
+
+        if not original_cv or not job_description:
+            return Response(
+                {"error": "Original CV and job description are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            crafted_cv = craft_tailored_cv(
+                cv_info=original_cv,
+                job_analysis=job_description
+            )
+            return Response(json.loads(crafted_cv), status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error in CV crafting: {str(e)}")
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class JobMatchFinderView(APIView):
+    def post(self, request):
+        cv_info = request.data.get("cv_info")
+
+        if not cv_info:
+            return Response(
+                {"error": "CV info is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            matches = find_matching_jobs(cv_info)
+            return Response(json.loads(matches), status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error in job matching: {str(e)}")
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any, Dict
 from urllib.parse import urlparse
 
+import filetype  # type: ignore[import]
 import requests
 from google.ai.generativelanguage_v1beta.types import Part
 
@@ -25,7 +26,6 @@ class ImageBytesLoader:
 
     Currently supported:
         - B64 Encoded image string
-        - Local file path
         - URL
     """
 
@@ -35,7 +35,6 @@ class ImageBytesLoader:
         Args:
             image_string: Can be either:
                     - B64 Encoded image string
-                    - Local file path
                     - URL
 
         Returns:
@@ -51,12 +50,17 @@ class ImageBytesLoader:
             return self._bytes_from_url(image_string)
 
         if route == Route.LOCAL_FILE:
+            raise ValueError(
+                "Loading from local files is no longer supported for security reasons. "
+                "Please pass in images as Google Cloud Storage URI, "
+                "b64 encoded image string (data:image/...), or valid image url."
+            )
             return self._bytes_from_file(image_string)
 
         raise ValueError(
             "Image string must be one of: Google Cloud Storage URI, "
-            "b64 encoded image string (data:image/...), valid image url, "
-            f"or existing local image file. Instead got '{image_string}'."
+            "b64 encoded image string (data:image/...), or valid image url."
+            f"Instead got '{image_string}'."
         )
 
     def load_part(self, image_string: str) -> Part:
@@ -65,7 +69,6 @@ class ImageBytesLoader:
         Args:
             image_string: Can be either:
                     - B64 Encoded image string
-                    - Local file path
                     - URL
         """
         route = self._route(image_string)
@@ -77,10 +80,21 @@ class ImageBytesLoader:
             bytes_ = self._bytes_from_url(image_string)
 
         if route == Route.LOCAL_FILE:
-            bytes_ = self._bytes_from_file(image_string)
+            msg = (
+                "Loading from local files is no longer supported for security reasons. "
+                "Please specify images as Google Cloud Storage URI, "
+                "b64 encoded image string (data:image/...), or valid image url."
+            )
+            raise ValueError(msg)
 
         inline_data: Dict[str, Any] = {"data": bytes_}
+
         mime_type, _ = mimetypes.guess_type(image_string)
+        if not mime_type:
+            kind = filetype.guess(bytes_)
+            if kind:
+                mime_type = kind.mime
+
         if mime_type:
             inline_data["mime_type"] = mime_type
 
@@ -98,8 +112,8 @@ class ImageBytesLoader:
 
         raise ValueError(
             "Image string must be one of: "
-            "b64 encoded image string (data:image/...), valid image url, "
-            f"or existing local image file. Instead got '{image_string}'."
+            "b64 encoded image string (data:image/...) or valid image url."
+            f" Instead got '{image_string}'."
         )
 
     def _bytes_from_b64(self, base64_image: str) -> bytes:
@@ -120,19 +134,6 @@ class ImageBytesLoader:
             return base64.b64decode(encoded_string)
 
         raise ValueError(f"Error in b64 encoded image. Must follow pattern: {pattern}")
-
-    def _bytes_from_file(self, file_path: str) -> bytes:
-        """Gets image bytes from a local file path.
-
-        Args:
-            file_path: Existing file path.
-
-        Returns:
-            Image bytes
-        """
-        with open(file_path, "rb") as image_file:
-            image_bytes = image_file.read()
-        return image_bytes
 
     def _bytes_from_url(self, url: str) -> bytes:
         """Gets image bytes from a public url.
