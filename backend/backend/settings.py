@@ -135,7 +135,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+RAPID_API_KEY = os.getenv('RAPID_API_KEY')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Only need Tesseract path now
 TESSERACT_PATH = r"C:\Program Files\Tesseract-OCR\tesseract.exe"

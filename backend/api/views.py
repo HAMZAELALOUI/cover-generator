@@ -10,7 +10,7 @@ import logging
 from .cover_letter_generator import generate_cover_letter
 from .job_gap_analyzer import analyze_job_gap
 from .cv_crafter import craft_tailored_cv
-from .job_match_finder import find_matching_jobs
+from .services.job_search_service import JobSearchService
 
 logger = logging.getLogger(__name__)
 
@@ -156,19 +156,41 @@ class CVCrafterView(APIView):
 
 class JobMatchFinderView(APIView):
     def post(self, request):
-        cv_info = request.data.get("cv_info")
-
-        if not cv_info:
-            return Response(
-                {"error": "CV info is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         try:
-            matches = find_matching_jobs(cv_info)
-            return Response(json.loads(matches), status=status.HTTP_200_OK)
+            cv_data = request.data
+            if not cv_data:
+                return Response(
+                    {"error": "CV data is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate required fields
+            required_fields = ["Name", "Skills", "Location"]
+            missing_fields = [field for field in required_fields if field not in cv_data]
+            if missing_fields:
+                return Response(
+                    {"error": f"Missing required fields: {', '.join(missing_fields)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Initialize job search service
+            job_service = JobSearchService()
+            
+            # Search for matching jobs
+            matching_jobs = job_service.search_jobs(cv_data)
+            
+            return Response({
+                "success": True,
+                "candidate_name": cv_data.get("Name"),
+                "matches": matching_jobs,
+                "match_count": len(matching_jobs),
+                "location": cv_data.get("Location")
+            }, status=status.HTTP_200_OK)
+
         except Exception as e:
-            logger.error(f"Error in job matching: {str(e)}")
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": f"An error occurred while finding job matches: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
