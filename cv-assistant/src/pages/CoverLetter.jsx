@@ -14,6 +14,7 @@ export default function CoverLetter() {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState({ step: null, message: '' });
   const [currentFile, setCurrentFile] = useState(null);
+  const [editedCoverLetter, setEditedCoverLetter] = useState(null);
 
   const languages = [
     'English', 'Spanish', 'French', 'German', 'Italian',
@@ -215,7 +216,12 @@ export default function CoverLetter() {
         </Card>
 
         {/* Preview Section */}
-        {coverLetter && <Preview content={coverLetter} />}
+        {coverLetter && (
+          <Preview 
+            content={editedCoverLetter || coverLetter} 
+            onUpdate={setEditedCoverLetter} 
+          />
+        )}
       </div>
     </div>
   );
