@@ -2,17 +2,87 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
-import CVTemplate from '../components/cv-template/CVTemplate';
-import { cvService } from '../services/api';
+import TemplateSelector from '../components/cv-template/TemplateSelector';
+import ExecutiveTemplate from '../components/cv-template/templates/ExecutiveTemplate';
+import ModernTemplate from '../components/cv-template/templates/ModernTemplate';
+
+const templates = [
+  {
+    id: 'executive',
+    name: 'Executive',
+    preview: '👔',
+    theme: {
+      primary: 'blue',
+      fontSize: 'normal',
+      fontFamily: 'sans',
+      layout: 'sidebar'
+    }
+  },
+  {
+    id: 'modern',
+    name: 'Modern',
+    preview: '🎨',
+    theme: {
+      primary: 'indigo',
+      fontSize: 'normal',
+      fontFamily: 'sans',
+      layout: 'header'
+    }
+  }
+];
+
+const getTemplateComponent = (templateId) => {
+  switch (templateId) {
+    case 'executive':
+      return ExecutiveTemplate;
+    case 'modern':
+      return ModernTemplate;
+    default:
+      return ExecutiveTemplate;
+  }
+};
 
 export default function CraftCV() {
-  const { cvData, setCvData } = useApp();
+  const { setCvData } = useApp();
   const [jobDescription, setJobDescription] = useState('');
   const [fileName, setFileName] = useState('');
   const [error, setError] = useState(null);
   const [status, setStatus] = useState({ step: null, message: '' });
   const [currentFile, setCurrentFile] = useState(null);
   const [craftedCV, setCraftedCV] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
+  const [profileImage, setProfileImage] = useState(null);
+
+  const handleTemplateChange = (template) => {
+    setSelectedTemplate(template);
+  };
+
+  const handleStyleChange = (styleUpdate) => {
+    setSelectedTemplate(prev => ({
+      ...prev,
+      theme: {
+        ...prev.theme,
+        ...styleUpdate
+      }
+    }));
+  };
+
+  const handleImageUpload = (file) => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setProfileImage(null);
+    }
+  };
+
+  const handleSectionEdit = (section, action) => {
+    // Handle section editing/toggling
+    console.log('Editing section:', section, action);
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -106,6 +176,8 @@ export default function CraftCV() {
       setStatus({ step: 'error', message: 'Error occurred during generation' });
     }
   };
+
+  const TemplateComponent = getTemplateComponent(selectedTemplate.id);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -202,14 +274,28 @@ export default function CraftCV() {
 
         {/* CV Preview */}
         {craftedCV && (
-          <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-              Crafted CV Preview
-            </h2>
-            <Card>
-              <CVTemplate cvData={craftedCV} />
-            </Card>
-          </div>
+          <>
+            <TemplateSelector
+              currentTemplate={selectedTemplate}
+              onTemplateChange={handleTemplateChange}
+              onStyleChange={handleStyleChange}
+              onImageUpload={handleImageUpload}
+              onSectionEdit={handleSectionEdit}
+              profileImage={profileImage}
+            />
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                Crafted CV Preview
+              </h2>
+              <Card>
+                <TemplateComponent 
+                  cvData={craftedCV}
+                  theme={selectedTemplate.theme}
+                  profileImage={profileImage}
+                />
+              </Card>
+            </div>
+          </>
         )}
       </div>
     </div>

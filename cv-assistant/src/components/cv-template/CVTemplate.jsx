@@ -1,12 +1,26 @@
 import React from 'react';
 
-export default function CVTemplate({ cvData }) {
+export default function CVTemplate({ cvData, template }) {
   if (!cvData) return null;
+
+  const { theme } = template;
+  
+  const getThemeClasses = () => {
+    const classes = {
+      container: `bg-white p-8 shadow-lg max-w-4xl mx-auto font-${theme.fontFamily}`,
+      header: `text-${theme.primary}-600`,
+      section: `mb-6 text-${theme.fontSize}`,
+      // ... add more theme classes
+    };
+    return classes;
+  };
+
+  const classes = getThemeClasses();
 
   const { personal_info, profil, competences, experience_professionnelle, formation, projets } = cvData;
 
   return (
-    <div className="bg-white p-8 shadow-lg max-w-4xl mx-auto">
+    <div className={classes.container}>
       {/* Header / Personal Info */}
       <header className="border-b-2 border-gray-300 pb-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">{personal_info.name}</h1>
