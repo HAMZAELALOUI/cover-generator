@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import CoverLetter from './pages/CoverLetter';
 import JobSearch from './pages/JobSearch';
 import Profile from './pages/Profile';
+import CraftCV from './pages/CraftCV';
 import { useApp } from './context/AppContext';
 import SkillGap from './components/skill-gap/SkillGap';
 
@@ -26,7 +27,8 @@ function AppContent() {
                     <Route path="/cover-letter" element={<CoverLetter />} />
                     <Route path="/skill-analysis" element={<SkillGap />} />
                     <Route path="/job-search" element={<JobSearch />} />
-                    <Route path="/cv-builder" element={<Profile />} />
+                    <Route path="/craft-cv" element={<CraftCV />} />
+                    <Route path="/profile" element={<Profile />} />
                   </Routes>
                 </Layout>
               }

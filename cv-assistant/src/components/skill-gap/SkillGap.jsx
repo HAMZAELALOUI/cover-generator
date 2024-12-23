@@ -122,7 +122,38 @@ export default function SkillGap() {
   };
 
   const cleanText = (text) => {
-    return text.replace(/\*\*/g, '').replace(/^\* /gm, '').trim();
+    return text
+      .replace(/^\#\#\s+/gm, '') // Remove markdown headers
+      .replace(/\*\*/g, '')      // Remove bold markers
+      .replace(/^\* /gm, '')     // Remove list markers
+      .trim();
+  };
+
+  const parseAnalysis = (analysisText) => {
+    // Split into main sections
+    const sections = analysisText.split(/(?=\d\. )/);
+    
+    // Extract introduction
+    const introduction = cleanText(sections[0]);
+    
+    // Parse numbered sections
+    const mainSections = sections.slice(1).map(section => {
+      const [title, ...content] = section.split('\n');
+      return {
+        title: cleanText(title),
+        content: content
+          .filter(line => line.trim())
+          .map(line => {
+            const cleaned = cleanText(line);
+            return {
+              text: cleaned,
+              isSubItem: line.startsWith('    ') || line.startsWith('\t'),
+            };
+          })
+      };
+    });
+
+    return { introduction, mainSections };
   };
 
   return (
@@ -230,13 +261,12 @@ export default function SkillGap() {
                   Gap Analysis Summary
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300">
-                  {cleanText(analysis.split('\n\n')[0])}
+                  {parseAnalysis(analysis).introduction}
                 </p>
               </div>
 
               {/* Main sections */}
-              {analysis.split(/(?=\d\. )/).slice(1).map((section, index) => {
-                const [title, ...content] = section.split('\n');
+              {parseAnalysis(analysis).mainSections.map((section, index) => {
                 const sectionId = `section-${index}`;
                 const isExpanded = expandedSections[sectionId] !== false;
 
@@ -247,7 +277,7 @@ export default function SkillGap() {
                       className="w-full flex items-center justify-between py-4 text-left"
                     >
                       <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                        {cleanText(title)}
+                        {section.title}
                       </h3>
                       <svg
                         className={`w-5 h-5 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -260,24 +290,16 @@ export default function SkillGap() {
                     
                     {isExpanded && (
                       <div className="pb-4 space-y-3">
-                        {content.map((paragraph, pIndex) => {
-                          const cleanParagraph = cleanText(paragraph);
-                          if (!cleanParagraph) return null;
-
-                          if (paragraph.startsWith('  ')) {
-                            return (
-                              <div key={pIndex} className="ml-6">
-                                <p className="text-gray-700 dark:text-gray-300">{cleanParagraph}</p>
-                              </div>
-                            );
-                          }
-
-                          return (
-                            <p key={pIndex} className="text-gray-700 dark:text-gray-300">
-                              {cleanParagraph}
-                            </p>
-                          );
-                        })}
+                        {section.content.map((item, pIndex) => (
+                          <p 
+                            key={pIndex} 
+                            className={`text-gray-700 dark:text-gray-300 ${
+                              item.isSubItem ? 'ml-6' : ''
+                            }`}
+                          >
+                            {item.text}
+                          </p>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -306,7 +328,6 @@ export default function SkillGap() {
                   Copy to Clipboard
                 </Button>
                 
-                {/* Copy notification */}
                 {copyNotification && (
                   <div className="absolute -top-10 right-0 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg">
                     Copied to clipboard!

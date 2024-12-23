@@ -12,7 +12,7 @@ export const cvService = {
   extractCV: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-
+    
     const response = await fetch(`${API_BASE_URL}/extract-cv/`, {
       method: 'POST',
       body: formData,
@@ -24,43 +24,34 @@ export const cvService = {
   analyzeJobDescription: async (jobDescription) => {
     const response = await fetch(`${API_BASE_URL}/analyze-job/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ job_description: jobDescription }),
     });
-
+    
     return handleResponse(response);
   },
 
-  generateCoverLetter: async (cvData, jobAnalysis, language) => {
+  craftCV: async (cvData, jobData) => {
+    const response = await fetch(`${API_BASE_URL}/craft-cv/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cv_data: cvData, job_data: jobData }),
+    });
+    
+    return handleResponse(response);
+  },
+
+  generateCoverLetter: async (cvData, jobData, language = 'English') => {
     const response = await fetch(`${API_BASE_URL}/generate-cover-letter/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        cv_info: cvData,
-        job_analysis: jobAnalysis,
-        language: language
+        cv_data: cvData,
+        job_data: jobData,
+        language: language,
       }),
     });
-    
-    return handleResponse(response);
-  },
 
-  analyzeSkillGap: async (cvData, jobDescription) => {
-    const response = await fetch(`${API_BASE_URL}/analyze-gap/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cv_info: cvData,
-        job_requirements: jobDescription
-      }),
-    });
-    
     return handleResponse(response);
   },
 };

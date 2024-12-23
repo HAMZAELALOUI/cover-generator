@@ -27,7 +27,7 @@ export default function Landing() {
     {
       title: 'Craft Your CV',
       description: 'Create and optimize your CV',
-      path: '/cv-builder',
+      path: '/craft-cv',
       icon: '📄',
     },
   ];
