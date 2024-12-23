@@ -89,8 +89,16 @@ export default function CraftCV() {
       }
 
       const data = await craftResponse.json();
-      setCraftedCV(data);
-      setStatus({ step: 'complete', message: 'CV crafted successfully' });
+      console.log('Received crafted CV data:', data);
+
+      if (data.success && data.tailored_cv) {
+        // Update both state variables with the tailored CV data
+        setCraftedCV(data.tailored_cv);  // Only pass the tailored_cv part
+        setCvData(data.tailored_cv);     // Update context with tailored CV
+        setStatus({ step: 'complete', message: 'CV crafted successfully' });
+      } else {
+        throw new Error('Invalid response format from server');
+      }
 
     } catch (error) {
       console.error('Error in CV crafting process:', error);
@@ -127,6 +135,11 @@ export default function CraftCV() {
               <span className="text-sm mt-1">Generate</span>
             </div>
           </div>
+          {status.message && (
+            <div className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+              {status.message}
+            </div>
+          )}
         </div>
 
         {error && (
@@ -190,8 +203,12 @@ export default function CraftCV() {
         {/* CV Preview */}
         {craftedCV && (
           <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Crafted CV Preview</h2>
-            <CVTemplate cvData={craftedCV} />
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+              Crafted CV Preview
+            </h2>
+            <Card>
+              <CVTemplate cvData={craftedCV} />
+            </Card>
           </div>
         )}
       </div>
