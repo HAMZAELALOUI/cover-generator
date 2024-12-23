@@ -7,6 +7,7 @@ import CoverLetter from './pages/CoverLetter';
 import JobSearch from './pages/JobSearch';
 import Profile from './pages/Profile';
 import { useApp } from './context/AppContext';
+import SkillGap from './components/skill-gap/SkillGap';
 
 function AppContent() {
   const { theme } = useApp();
@@ -23,7 +24,7 @@ function AppContent() {
                 <Layout>
                   <Routes>
                     <Route path="/cover-letter" element={<CoverLetter />} />
-                    <Route path="/skill-analysis" element={<Dashboard />} />
+                    <Route path="/skill-analysis" element={<SkillGap />} />
                     <Route path="/job-search" element={<JobSearch />} />
                     <Route path="/cv-builder" element={<Profile />} />
                   </Routes>

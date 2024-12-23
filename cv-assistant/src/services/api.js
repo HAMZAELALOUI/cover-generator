@@ -48,4 +48,19 @@ export const cvService = {
     
     return handleResponse(response);
   },
+
+  analyzeSkillGap: async (cvData, jobDescription) => {
+    const response = await fetch(`${API_BASE_URL}/analyze-gap/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cv_info: cvData,
+        job_requirements: jobDescription
+      }),
+    });
+    
+    return handleResponse(response);
+  },
 };

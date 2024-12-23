@@ -22,19 +22,29 @@ export default function Preview({ content, onUpdate }) {
   const handleDownloadPDF = () => {
     const element = document.createElement('div');
     element.innerHTML = `
-      <div style="padding: 20px; font-family: Arial, sans-serif;">
-        <div style="white-space: pre-wrap; font-size: 12pt; line-height: 1.5;">
+      <div style="padding: 1in; font-family: Arial, sans-serif; max-width: 8.5in;">
+        <div style="white-space: pre-wrap; font-size: 11pt; line-height: 1.15; margin: 0;">
           ${editedContent}
         </div>
       </div>
     `;
 
     const opt = {
-      margin: [0.5, 0.5, 0.5, 0.5],
+      margin: 0,
       filename: 'cover-letter.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      html2canvas: { 
+        scale: 2,
+        letterRendering: true,
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'letter', 
+        orientation: 'portrait',
+        compress: true,
+        precision: 2,
+      },
+      pagebreak: { mode: 'avoid-all' }
     };
 
     html2pdf().set(opt).from(element).save();
