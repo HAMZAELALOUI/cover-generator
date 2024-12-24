@@ -2,38 +2,40 @@ import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import Card from '../common/Card';
 import Button from '../common/Button';
+import { jobService } from '../../services/api';
 
 export default function JobMatches() {
   const { cvData } = useApp();
-  const [matches, setMatches] = useState([]);
+  const [matches, setMatches] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchJobMatches = useCallback(async () => {
     if (!cvData) return;
     
     setLoading(true);
+    setError(null);
+    
     try {
-      const response = await fetch('http://localhost:8000/api/job-matches/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(cvData),
-      });
-      const data = await response.json();
-      setMatches(data.jobs || []);
+      console.log('Fetching job matches with CV data:', cvData);
+      const result = await jobService.searchJobs(cvData);
+      console.log('Job matches result:', result);
+      setMatches(result);
     } catch (error) {
       console.error('Error fetching job matches:', error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   }, [cvData]);
 
   useEffect(() => {
-    fetchJobMatches();
+    if (cvData) {
+      fetchJobMatches();
+    }
   }, [fetchJobMatches]);
 
-  if (!matches.length && !loading) return null;
+  if (!cvData) return null;
 
   return (
     <Card title="Job Matches">
@@ -41,29 +43,39 @@ export default function JobMatches() {
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
         </div>
+      ) : error ? (
+        <div className="text-red-500 text-center py-4">
+          {error}
+          <Button
+            onClick={fetchJobMatches}
+            variant="secondary"
+            className="mt-2"
+          >
+            Try Again
+          </Button>
+        </div>
+      ) : matches ? (
+        <div className="space-y-6">
+          {/* Job Matches Display */}
+          <div className="space-y-4">
+            {matches.map((match, index) => (
+              <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-semibold">{match.title}</h3>
+                <p className="text-sm text-gray-600">{match.company}</p>
+                <p className="mt-2">{match.description}</p>
+                {match.match_score && (
+                  <div className="mt-2">
+                    <span className="text-sm font-medium">Match Score: </span>
+                    <span className="text-blue-600">{match.match_score}%</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {matches.map((job, index) => (
-            <div key={index} className="border rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-lg">{job.title}</h3>
-                  <p className="text-gray-600">{job.company}</p>
-                  <p className="text-sm text-gray-500">{job.location}</p>
-                </div>
-                <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full">
-                  {job.match_score}% Match
-                </span>
-              </div>
-              <p className="mt-2 text-gray-700 line-clamp-2">{job.description}</p>
-              <div className="mt-3 flex gap-2">
-                <Button onClick={() => window.open(job.url, '_blank')}>
-                  Apply Now
-                </Button>
-                <Button variant="secondary">Save Job</Button>
-              </div>
-            </div>
-          ))}
+        <div className="text-center py-8 text-gray-500">
+          No job matches found. Try updating your CV with more details.
         </div>
       )}
     </Card>

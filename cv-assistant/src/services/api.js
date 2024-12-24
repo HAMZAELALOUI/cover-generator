@@ -3,22 +3,29 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api';
 const handleResponse = async (response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.detail || `HTTP error! status: ${response.status}`);
+    throw new Error(errorData?.error || `HTTP error! status: ${response.status}`);
   }
   return response.json();
 };
 
 export const cvService = {
   extractCV: async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    const response = await fetch(`${API_BASE_URL}/extract-cv/`, {
-      method: 'POST',
-      body: formData,
-    });
-    
-    return handleResponse(response);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      console.log('Uploading file:', file.name);
+      
+      const response = await fetch(`${API_BASE_URL}/extract-cv/`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      return handleResponse(response);
+    } catch (error) {
+      console.error('CV extraction error:', error);
+      throw error;
+    }
   },
 
   analyzeJobDescription: async (jobDescription) => {
@@ -31,27 +38,41 @@ export const cvService = {
     return handleResponse(response);
   },
 
-  craftCV: async (cvData, jobData) => {
-    const response = await fetch(`${API_BASE_URL}/craft-cv/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cv_data: cvData, job_data: jobData }),
-    });
-    
-    return handleResponse(response);
-  },
-
-  generateCoverLetter: async (cvData, jobData, language = 'English') => {
+  generateCoverLetter: async (cvData, jobAnalysis, language = 'English') => {
     const response = await fetch(`${API_BASE_URL}/generate-cover-letter/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        cv_data: cvData,
-        job_data: jobData,
-        language: language,
+        cv_info: cvData,
+        job_analysis: jobAnalysis,
+        language: language
       }),
     });
 
     return handleResponse(response);
-  },
+  }
+};
+
+export const jobService = {
+  searchJobs: async (cvData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/job-match-finder/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Name: cvData.personal_info?.name || '',
+          Skills: cvData.competences || [],
+          Location: cvData.personal_info?.location || '',
+          Profile: cvData.profil || '',
+          "Work Experience": cvData.experience_professionnelle || [],
+          Education: cvData.education || []
+        })
+      });
+      
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Job search error:', error);
+      throw error;
+    }
+  }
 };
