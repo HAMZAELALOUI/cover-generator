@@ -56,20 +56,38 @@ export const cvService = {
 export const jobService = {
   searchJobs: async (cvData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/job-match-finder/`, {
+      console.log('CV Data received:', cvData);
+      
+      // Format the data exactly as the backend expects
+      // const cvData = {
+      //   Name: cvData.personal_info?.name || '',
+      //   Skills: Array.isArray(cvData.competences) 
+      //     ? cvData.competences 
+      //     : Object.values(cvData.competences || {}),
+      //   Location: cvData.personal_info?.location || '',
+      //   Profile: cvData.profil || '',
+      //   "Work Experience": Array.isArray(cvData.experience_professionnelle) 
+      //     ? cvData.experience_professionnelle 
+      //     : [],
+      //   Education: Array.isArray(cvData.education) 
+      //     ? cvData.education 
+      //     : []
+      // };
+
+      console.log('Sending formatted data:', cvData);
+
+      const response = await fetch(`${API_BASE_URL}/find-matches/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Name: cvData.personal_info?.name || '',
-          Skills: cvData.competences || [],
-          Location: cvData.personal_info?.location || '',
-          Profile: cvData.profil || '',
-          "Work Experience": cvData.experience_professionnelle || [],
-          Education: cvData.education || []
-        })
+        body: JSON.stringify(cvData)
       });
       
-      return handleResponse(response);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `HTTP error! status: ${response.status}`);
+      }
+      console.log('Job search hhhhhh response:', response);
+      return response.json();
     } catch (error) {
       console.error('Job search error:', error);
       throw error;
