@@ -270,14 +270,14 @@ export default function CraftCV() {
         {/* CV Preview */}
         {craftedCV && (
           <>
-            <TemplateSelector
+            {/* <TemplateSelector
               currentTemplate={selectedTemplate}
               onTemplateChange={handleTemplateChange}
               onStyleChange={handleStyleChange}
               onImageUpload={handleImageUpload}
               onSectionEdit={handleSectionEdit}
               profileImage={profileImage}
-            />
+            /> */}
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
                 CV Preview
