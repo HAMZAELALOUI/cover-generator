@@ -6,7 +6,9 @@ export default function Card({ children, title, className = '' }) {
           {title}
         </h2>
       )}
-      {children}
+      <div className="text-gray-800 dark:text-gray-200">
+        {children}
+      </div>
     </div>
   );
 }

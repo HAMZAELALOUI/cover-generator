@@ -6,20 +6,24 @@ export default function DownloadPDF({ targetRef, fileName = 'cv.pdf' }) {
   const handleDownload = () => {
     const element = targetRef.current;
     const opt = {
-      margin: 0,
+      margin: [10, 10, 10, 10],
       filename: fileName,
       enableLinks: true,
+      pagebreak: { mode: 'avoid-all' },
       html2canvas: { 
         scale: 2,
         useCORS: true,
         letterRendering: true,
-        scrollY: -window.scrollY
+        scrollY: -window.scrollY,
+        windowWidth: 794, // A4 width in pixels at 96 DPI
+        windowHeight: 1123 // A4 height in pixels at 96 DPI
       },
       jsPDF: { 
         unit: 'mm', 
         format: 'a4', 
         orientation: 'portrait',
-        compress: false
+        compress: true,
+        precision: 16
       }
     };
 
@@ -46,7 +50,7 @@ export default function DownloadPDF({ targetRef, fileName = 'cv.pdf' }) {
               clipRule="evenodd" 
             />
           </svg>
-          Télécharger PDF
+          Download PDF
         </span>
       </Button>
     </div>

@@ -6,7 +6,7 @@ import Preview from '../components/cover-letter/Preview';
 import { cvService } from '../services/api';
 
 export default function CoverLetter() {
-  const { setCvData } = useApp();
+  const { cvData, setCvData } = useApp();
   const [jobDescription, setJobDescription] = useState('');
   const [language, setLanguage] = useState('English');
   const [coverLetter, setCoverLetter] = useState(null);
@@ -53,9 +53,9 @@ export default function CoverLetter() {
     try {
       // Step 1: Extract CV
       setStatus({ step: 'cv', message: 'Analyzing CV...' });
-      const cvData = await cvService.extractCV(currentFile);
-      if (!cvData) throw new Error('Failed to extract CV data');
-      setCvData(cvData);
+      const extractedCvData = await cvService.extractCV(currentFile);
+      if (!extractedCvData) throw new Error('Failed to extract CV data');
+      setCvData(extractedCvData);
       setStatus({ step: 'cv', message: 'CV analysis complete' });
 
       // Step 2: Analyze Job Description
@@ -67,7 +67,7 @@ export default function CoverLetter() {
       // Step 3: Generate Cover Letter
       setStatus({ step: 'generate', message: 'Generating cover letter...' });
       const coverLetterData = await cvService.generateCoverLetter(
-        cvData,
+        extractedCvData,
         jobData,
         language
       );
@@ -96,73 +96,75 @@ export default function CoverLetter() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 mb-4">
             Cover Letter Generator
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            Upload your CV and paste the job description to generate a personalized cover letter
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Create a professional cover letter in minutes
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div className={`flex flex-col items-center ${getStatusColor('upload')}`}>
-              <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center">
-                1
+        <div className="mb-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <div className="flex justify-between items-center relative">
+            {/* Progress Line */}
+            <div className="absolute h-1 bg-gray-200 dark:bg-gray-700 top-4 left-0 right-0 -z-10"></div>
+            
+            {['upload', 'cv', 'job', 'complete'].map((step, index) => (
+              <div key={step} className={`flex flex-col items-center ${getStatusColor(step)}`}>
+                <div className="w-10 h-10 rounded-full border-2 flex items-center justify-center bg-white dark:bg-gray-800 shadow-md">
+                  {index + 1}
+                </div>
+                <span className="text-sm mt-2 font-medium">{
+                  {
+                    'upload': 'Upload CV',
+                    'cv': 'Analyze CV',
+                    'job': 'Analyze Job',
+                    'complete': 'Generate'
+                  }[step]
+                }</span>
               </div>
-              <span className="text-sm mt-1">Upload CV</span>
-            </div>
-            <div className={`flex flex-col items-center ${getStatusColor('cv')}`}>
-              <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center">
-                2
-              </div>
-              <span className="text-sm mt-1">Analyze CV</span>
-            </div>
-            <div className={`flex flex-col items-center ${getStatusColor('job')}`}>
-              <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center">
-                3
-              </div>
-              <span className="text-sm mt-1">Analyze Job</span>
-            </div>
-            <div className={`flex flex-col items-center ${getStatusColor('complete')}`}>
-              <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center">
-                4
-              </div>
-              <span className="text-sm mt-1">Generate</span>
-            </div>
+            ))}
           </div>
           {status.message && (
-            <div className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+            <div className="text-center mt-6 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md">
               {status.message}
             </div>
           )}
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-            {error}
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg shadow-sm">
+            <div className="flex items-center">
+              <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </div>
           </div>
         )}
 
-        <Card className="mb-8">
+        <Card className="mb-8 shadow-xl">
           <div className="space-y-8">
             {/* File Upload Section */}
             <div className="text-center">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                Upload your CV (PDF only)
+              <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">
+                Upload your CV
               </label>
               <div className="flex flex-col items-center space-y-4">
-                <label className="cursor-pointer">
-                  <div className="flex flex-col items-center p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label className="cursor-pointer w-full">
+                  <div className="flex flex-col items-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-400 transition-colors bg-gray-50 dark:bg-gray-800/50">
+                    <svg className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    <span className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                      {fileName || 'Click to upload PDF'}
+                    <span className="text-base text-gray-500 dark:text-gray-400">
+                      {fileName || 'Drop your PDF here, or click to browse'}
+                    </span>
+                    <span className="mt-2 text-sm text-gray-400 dark:text-gray-500">
+                      PDF files only
                     </span>
                     <input
                       type="file"
@@ -176,19 +178,21 @@ export default function CoverLetter() {
             </div>
 
             {/* Language Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Select Language
-              </label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="block w-full px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              >
-                {languages.map((lang) => (
-                  <option key={lang} value={lang}>{lang}</option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Select Language
+                </label>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="block w-full px-4 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang} value={lang}>{lang}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Job Description */}
@@ -200,7 +204,7 @@ export default function CoverLetter() {
                 value={jobDescription}
                 onChange={(e) => setJobDescription(e.target.value)}
                 rows={8}
-                className="block w-full px-4 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
+                className="block w-full px-4 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
                 placeholder="Paste the job description here..."
               />
             </div>
@@ -208,19 +212,31 @@ export default function CoverLetter() {
             <Button
               onClick={generateCoverLetter}
               disabled={status.step === 'generate' || !fileName || !jobDescription}
-              className="w-full py-3 text-lg"
+              className="w-full py-4 text-lg font-medium rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              {status.step === 'generate' ? 'Generating...' : 'Generate Cover Letter'}
+              {status.step === 'generate' ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating...
+                </div>
+              ) : (
+                'Generate Cover Letter'
+              )}
             </Button>
           </div>
         </Card>
 
         {/* Preview Section */}
         {coverLetter && (
-          <Preview 
-            content={editedCoverLetter || coverLetter} 
-            onUpdate={setEditedCoverLetter} 
-          />
+          <div className="transform transition-all duration-500 ease-in-out">
+            <Preview 
+              content={editedCoverLetter || coverLetter} 
+              onUpdate={setEditedCoverLetter} 
+            />
+          </div>
         )}
       </div>
     </div>

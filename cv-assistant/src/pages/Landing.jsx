@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import Card from '../components/common/Card';
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
 export default function Landing() {
-  const { theme, setTheme } = useApp();
+  const { darkMode, toggleDarkMode } = useApp();
 
   const features = [
     {
@@ -36,10 +37,14 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="fixed top-4 right-4">
         <button
-          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          onClick={toggleDarkMode}
           className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
         >
-          {theme === 'light' ? '🌙' : '☀️'}
+          {darkMode ? (
+            <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+          ) : (
+            <MoonIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+          )}
         </button>
       </div>
 

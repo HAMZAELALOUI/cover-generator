@@ -13,8 +13,9 @@ export default function EditSection({ onEdit, className = '' }) {
   return (
     <button
       onClick={handleClick}
-      className={`absolute top-2 right-2 p-2 rounded-full bg-white shadow-md
-        hover:bg-gray-100 text-gray-600 hover:text-gray-800 
+      className={`absolute top-2 right-2 p-2 rounded-full bg-white dark:bg-gray-700 shadow-md
+        hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 
+        hover:text-gray-800 dark:hover:text-white 
         opacity-0 group-hover:opacity-100 transition-opacity z-10 ${className}`}
     >
       <svg

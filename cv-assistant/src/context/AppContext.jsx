@@ -3,31 +3,34 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
-  const [cvData, setCvData] = useState(null);
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'light';
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
+  const [cvData, setCvData] = useState(null);
+
   useEffect(() => {
-    localStorage.setItem('theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
-  const value = {
-    cvData,
-    setCvData,
-    theme,
-    setTheme,
-  };
+  const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={{ 
+      darkMode, 
+      toggleDarkMode,
+      cvData,
+      setCvData
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
 }
 
-export function useApp() {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
-}
+export const useApp = () => useContext(AppContext);

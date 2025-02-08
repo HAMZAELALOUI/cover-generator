@@ -36,3 +36,28 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom scrollbar styles */
+.scrollable-cv::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-cv::-webkit-scrollbar-track {
+  background: #E5E7EB;
+  border-radius: 4px;
+}
+
+.scrollable-cv::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 4px;
+}
+
+.scrollable-cv::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+/* For Firefox */
+.scrollable-cv {
+  scrollbar-width: thin;
+  scrollbar-color: #4B5563 #E5E7EB;
+}

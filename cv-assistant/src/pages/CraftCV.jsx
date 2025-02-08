@@ -5,6 +5,7 @@ import Button from '../components/common/Button';
 import TemplateSelector from '../components/cv-template/TemplateSelector';
 import ExecutiveTemplate from '../components/cv-template/templates/ExecutiveTemplate';
 import ModernTemplate from '../components/cv-template/templates/ModernTemplate';
+import CVTemplate from '../components/cv-template/CVTemplate';
 
 const templates = [
   {
@@ -32,6 +33,7 @@ const templates = [
 ];
 
 const getTemplateComponent = (templateId) => {
+  console.log('Selected template:', templateId);
   switch (templateId) {
     case 'executive':
       return ExecutiveTemplate;
@@ -52,6 +54,7 @@ export default function CraftCV() {
   const [craftedCV, setCraftedCV] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
   const [profileImage, setProfileImage] = useState(null);
+  const [generatedPdfUrl, setGeneratedPdfUrl] = useState(null);
 
   const handleTemplateChange = (template) => {
     setSelectedTemplate(template);
@@ -129,18 +132,11 @@ export default function CraftCV() {
       }
 
       const extractedCvData = await extractResponse.json();
-      setCvData(extractedCvData);
-      setStatus({ step: 'cv', message: 'CV analysis complete' });
+      console.log('Extracted CV Data:', extractedCvData);
 
       // Step 2: Craft CV with Job Description
       setStatus({ step: 'job', message: 'Crafting CV...' });
       
-      // Log the data being sent for debugging
-      console.log('Sending to craft-cv:', {
-        original_cv: extractedCvData,
-        job_description: jobDescription
-      });
-
       const craftResponse = await fetch('http://127.0.0.1:8000/api/craft-cv/', {
         method: 'POST',
         headers: {
@@ -162,9 +158,8 @@ export default function CraftCV() {
       console.log('Received crafted CV data:', data);
 
       if (data.success && data.tailored_cv) {
-        // Update both state variables with the tailored CV data
-        setCraftedCV(data.tailored_cv);  // Only pass the tailored_cv part
-        setCvData(data.tailored_cv);     // Update context with tailored CV
+        setCraftedCV(data.tailored_cv);
+        setCvData(data.tailored_cv);
         setStatus({ step: 'complete', message: 'CV crafted successfully' });
       } else {
         throw new Error('Invalid response format from server');
@@ -285,13 +280,14 @@ export default function CraftCV() {
             />
             <div className="mt-8">
               <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                Crafted CV Preview
+                CV Preview
               </h2>
               <Card>
                 <TemplateComponent 
                   cvData={craftedCV}
                   theme={selectedTemplate.theme}
                   profileImage={profileImage}
+                  generatedPdfUrl={generatedPdfUrl}
                 />
               </Card>
             </div>

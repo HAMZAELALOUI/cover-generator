@@ -1,26 +1,30 @@
 import React from 'react';
 import { FaImage } from 'react-icons/fa';
 
-const templates = [
+const latexTemplates = [
   {
-    id: 'modern',
-    name: 'Modern',
-    description: 'Clean and modern layout with sidebar',
+    id: 'modern_cv',
+    name: 'ModernCV',
+    description: 'Professional LaTeX template with clean design',
+    preview: '📄 Modern'
   },
   {
-    id: 'executive',
-    name: 'Executive',
-    description: 'Professional template for executives',
+    id: 'awesome_cv',
+    name: 'Awesome CV',
+    description: 'Stylish and feature-rich template',
+    preview: '📑 Awesome'
   },
   {
-    id: 'creative',
-    name: 'Creative',
-    description: 'Modern design for creative professionals',
+    id: 'alta_cv',
+    name: 'AltaCV',
+    description: 'Academic and research-focused design',
+    preview: '📋 Alta'
   },
   {
-    id: 'minimal',
-    name: 'Minimal',
-    description: 'Simple and clean design',
+    id: 'classic_cv',
+    name: 'Classic CV',
+    description: 'Traditional academic curriculum vitae',
+    preview: '📜 Classic'
   }
 ];
 
@@ -32,34 +36,41 @@ export default function TemplateSelector({
   profileImage 
 }) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold mb-6">Choose Template</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
+        Choose LaTeX Template
+      </h3>
       
-      {/* Template Options */}
+      {/* LaTeX Template Options */}
       <div className="grid grid-cols-2 gap-4 mb-8">
-        {templates.map((template) => (
+        {latexTemplates.map((template) => (
           <button
             key={template.id}
             onClick={() => onTemplateChange(template)}
             className={`p-4 rounded-lg border-2 text-left transition-all
               ${currentTemplate?.id === template.id 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 hover:border-blue-300'}`}
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'}
+              dark:text-white`}
           >
-            <div className="h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center">
-              <span className="text-gray-400">Template Preview</span>
+            <div className="h-32 bg-gray-100 dark:bg-gray-700 rounded-md mb-3 flex items-center justify-center text-4xl">
+              {template.preview}
             </div>
-            <h4 className="font-medium text-gray-900 mb-1">{template.name}</h4>
-            <p className="text-sm text-gray-500">{template.description}</p>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+              {template.name}
+            </h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {template.description}
+            </p>
           </button>
         ))}
       </div>
 
-      {/* Customization Options */}
+      {/* LaTeX Customization Options */}
       <div className="space-y-6">
         {/* Profile Image Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Profile Photo
           </label>
           <div className="flex items-center gap-4">
@@ -78,7 +89,7 @@ export default function TemplateSelector({
                 </button>
               </div>
             ) : (
-              <label className="w-20 h-20 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-full cursor-pointer hover:border-blue-500">
+              <label className="w-20 h-20 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-full cursor-pointer hover:border-blue-500 dark:hover:border-blue-400">
                 <input
                   type="file"
                   className="hidden"
@@ -89,46 +100,57 @@ export default function TemplateSelector({
                     }
                   }}
                 />
-                <FaImage className="text-gray-400 text-xl" />
+                <FaImage className="text-gray-400 dark:text-gray-500 text-xl" />
               </label>
             )}
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               Add a professional photo (optional)
             </span>
           </div>
         </div>
 
-        {/* Color Theme */}
+        {/* Document Style */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Color Theme
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {['blue', 'green', 'purple', 'red', 'gray'].map((color) => (
-              <button
-                key={color}
-                onClick={() => onStyleChange({ primary: color })}
-                className={`w-8 h-8 rounded-full border-2 transition-transform
-                  bg-${color}-500 hover:scale-110
-                  ${currentTemplate?.theme?.primary === color ? 'border-black scale-110' : 'border-transparent'}`}
-                title={color.charAt(0).toUpperCase() + color.slice(1)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Font Style */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Font Style
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Document Style
           </label>
           <select
-            onChange={(e) => onStyleChange({ font: e.target.value })}
-            className="w-full p-2 border rounded-md"
+            onChange={(e) => onStyleChange({ style: e.target.value })}
+            className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
           >
-            <option value="sans">Modern Sans</option>
-            <option value="serif">Classic Serif</option>
-            <option value="mono">Professional Mono</option>
+            <option value="casual">Casual</option>
+            <option value="professional">Professional</option>
+            <option value="academic">Academic</option>
+            <option value="technical">Technical</option>
+          </select>
+        </div>
+
+        {/* Paper Size */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Paper Size
+          </label>
+          <select
+            onChange={(e) => onStyleChange({ paperSize: e.target.value })}
+            className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+          >
+            <option value="a4">A4 (European)</option>
+            <option value="letter">Letter (US)</option>
+          </select>
+        </div>
+
+        {/* Font Size */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Font Size
+          </label>
+          <select
+            onChange={(e) => onStyleChange({ fontSize: e.target.value })}
+            className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+          >
+            <option value="10pt">Small (10pt)</option>
+            <option value="11pt">Medium (11pt)</option>
+            <option value="12pt">Large (12pt)</option>
           </select>
         </div>
       </div>
