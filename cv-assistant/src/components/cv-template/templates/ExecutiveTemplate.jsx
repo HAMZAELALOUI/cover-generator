@@ -1,140 +1,257 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { jsPDF } from 'jspdf';
 
 export default function ExecutiveTemplate({ cvData, theme, profileImage }) {
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generatePDF = async () => {
+    setIsGenerating(true);
+    
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      // Helper function for text wrapping
+      const addWrappedText = (text, y, fontSize = 12, isBold = false) => {
+        doc.setFontSize(fontSize);
+        if (isBold) doc.setFont('helvetica', 'bold');
+        else doc.setFont('helvetica', 'normal');
+        
+        const textWidth = 170; // Adjusted width for better text wrapping
+        const splitText = doc.splitTextToSize(text, textWidth);
+        doc.text(splitText, 20, y);
+        return (splitText.length * fontSize * 0.3527) + 2;
+      };
+
+      // Set initial position
+      let y = 20;
+
+      // Name (Large and Bold)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(24);
+      doc.text(cvData?.personal_info?.name || '', 20, y);
+      y += 15;
+
+      // Contact Info (Inline with icons)
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const contactInfo = [
+        `📍 ${cvData?.personal_info?.location || ''}`,
+        `📞 ${cvData?.personal_info?.phone || ''}`,
+        `✉️ ${cvData?.personal_info?.email || ''}`
+      ].filter(Boolean).join('    ');
+      doc.text(contactInfo, 20, y);
+      y += 15;
+
+      // Professional Summary
+      doc.setFont('helvetica', 'normal');
+      y += addWrappedText(cvData?.profil || '', y, 11);
+      y += 10;
+
+      // Work Experience Section
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('WORK EXPERIENCE', 20, y);
+      y += 8;
+
+      // Experience entries
+      cvData?.experience_professionnelle?.forEach(exp => {
+        // Job Title and Date
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(exp.poste, 20, y);
+        
+        // Right-aligned date
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        const dateWidth = doc.getTextWidth(exp.periode);
+        doc.text(exp.periode, 190 - dateWidth, y);
+        y += 5;
+
+        // Company
+        doc.setFont('helvetica', 'normal');
+        doc.text(exp.entreprise, 20, y);
+        y += 5;
+
+        // Achievements
+        exp.realisations?.forEach(realisation => {
+          y += addWrappedText(`• ${realisation}`, y, 10);
+        });
+        y += 5;
+      });
+
+      // Skills Section
+      y += 5;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('HARD SKILLS', 20, y);
+      y += 8;
+
+      // Skills content
+      Object.entries(cvData?.competences || {}).forEach(([category, skills]) => {
+        if (Array.isArray(skills)) {
+          y += addWrappedText(skills.join(', '), y, 10);
+        }
+      });
+
+      // Education Section
+      y += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('EDUCATION AND CERTIFICATES', 20, y);
+      y += 8;
+
+      // Education entries
+      cvData?.formation?.forEach(edu => {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text(edu.diplome, 20, y);
+        y += 5;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`${edu.etablissement} | ${edu.periode}`, 20, y);
+        y += 7;
+      });
+
+      // Languages Section
+      y += 5;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('LANGUAGES', 20, y);
+      y += 8;
+
+      // Languages content
+      const languages = Object.entries(cvData?.personal_info?.languages || {})
+        .map(([lang, level]) => `${lang}: ${level}`)
+        .join(' | ');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(languages, 20, y);
+
+      // Save the PDF
+      doc.save(`${cvData?.personal_info?.name || 'CV'}.pdf`);
+      setIsGenerating(false);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setIsGenerating(false);
+    }
+  };
+
+  // Template Preview
   return (
-    <div className="p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-4xl mx-auto">
-      {/* Header Section with gradient background */}
-      <div className="mb-8 pb-6 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-lg"></div>
-        <div className="relative p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                {cvData?.personal_info?.name}
-              </h1>
-              <h2 className="text-2xl text-gray-700 dark:text-gray-200 mb-3">
-                {cvData?.personal_info?.titre}
-              </h2>
-            </div>
-            {profileImage && (
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg">
-                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-              </div>
-            )}
-          </div>
-          <div className="flex gap-6 text-gray-600 dark:text-gray-300 mt-4">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span>{cvData?.personal_info?.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-              <span>{cvData?.personal_info?.phone}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>{cvData?.personal_info?.location}</span>
-            </div>
+    <div className="relative">
+      {/* Download Button */}
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          onClick={generatePDF}
+          disabled={isGenerating}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition-colors disabled:opacity-50"
+        >
+          {isGenerating ? (
+            <span>Generating PDF...</span>
+          ) : (
+            <span>Download ATS-Friendly PDF</span>
+          )}
+        </button>
+      </div>
+
+      {/* CV Preview */}
+      <div id="cv-content" className="p-8 bg-white max-w-4xl mx-auto">
+        {/* Header with accent color */}
+        <div className="mb-8 border-l-4 border-blue-600 pl-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{cvData?.personal_info?.name}</h1>
+          <h2 className="text-xl text-gray-700 mb-3">{cvData?.personal_info?.titre}</h2>
+          <div className="text-gray-600 space-y-1">
+            <div>{cvData?.personal_info?.location}</div>
+            <div>{cvData?.personal_info?.phone}</div>
+            <div>{cvData?.personal_info?.email}</div>
           </div>
         </div>
-      </div>
 
-      {/* Profile Section */}
-      <div className="mb-8 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          Profil
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          {cvData?.profil}
-        </p>
-      </div>
+        {/* Professional Summary */}
+        <div className="mb-8">
+          <p className="text-gray-700 leading-relaxed border-b pb-4">{cvData?.profil}</p>
+        </div>
 
-      {/* Experience Section */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          Experience Professionnelle
-        </h2>
-        {cvData?.experience_professionnelle?.map((exp, index) => (
-          <div key={index} className="mb-6 bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-medium text-gray-800 dark:text-white mb-1">
-                  {exp.poste}
-                </h3>
-                <h4 className="text-lg text-gray-700 dark:text-gray-200 mb-1">
-                  {exp.entreprise}
-                </h4>
+        {/* Work Experience */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 bg-gray-50 p-2 border-l-4 border-blue-600">
+            WORK EXPERIENCE
+          </h2>
+          {cvData?.experience_professionnelle?.map((exp, index) => (
+            <div key={index} className="mb-6">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="font-bold text-gray-800 text-lg">{exp.poste}</h3>
+                  <p className="text-gray-700">{exp.entreprise}</p>
+                </div>
+                <span className="text-gray-600 bg-gray-50 px-3 py-1 rounded">
+                  {exp.periode}
+                </span>
               </div>
-              <span className="text-sm bg-blue-600 text-white dark:bg-blue-500 px-4 py-1 rounded-full">
-                {exp.periode}
-              </span>
-            </div>
-            <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
-              {exp.realisations?.map((realisation, idx) => (
-                <li key={idx} className="pl-2">{realisation}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      {/* Skills Section */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          Compétences
-        </h2>
-        <div className="grid gap-6">
-          {Object.entries(cvData?.competences || {}).map(([category, skills]) => (
-            <div key={category} className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-              <h3 className="text-xl font-medium text-gray-800 dark:text-white capitalize mb-4">
-                {category.replace('_', ' ')}
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {Array.isArray(skills) && skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="px-4 py-2 bg-white dark:bg-gray-600 rounded-full text-gray-700 dark:text-gray-300 shadow-sm border border-gray-200 dark:border-gray-500"
-                  >
-                    {skill}
-                  </span>
+              <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
+                {exp.realisations?.map((item, idx) => (
+                  <li key={idx}>{item}</li>
                 ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Skills */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 bg-gray-50 p-2 border-l-4 border-blue-600">
+            HARD SKILLS
+          </h2>
+          <div className="space-y-3">
+            {Object.entries(cvData?.competences || {}).map(([category, skills]) => (
+              Array.isArray(skills) && (
+                <div key={category} className="text-gray-600">
+                  <span className="font-semibold text-gray-700">{category}: </span>
+                  {skills.map((skill, index) => (
+                    <span key={index} className="inline-block bg-gray-50 px-3 py-1 rounded mr-2 mb-2">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+
+        {/* Education */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 bg-gray-50 p-2 border-l-4 border-blue-600">
+            EDUCATION AND CERTIFICATES
+          </h2>
+          {cvData?.formation?.map((edu, index) => (
+            <div key={index} className="mb-4">
+              <h3 className="font-bold text-gray-800">{edu.diplome}</h3>
+              <div className="flex justify-between items-center text-gray-600">
+                <span>{edu.etablissement}</span>
+                <span className="text-gray-500">{edu.periode}</span>
               </div>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Languages */}
-      <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-          </svg>
-          Langues
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Object.entries(cvData?.personal_info?.languages || {}).map(([lang, level], index) => (
-            <div key={index} className="bg-white dark:bg-gray-600 p-4 rounded-lg shadow-sm">
-              <span className="text-lg font-medium text-gray-700 dark:text-gray-300 block mb-1">{lang}</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">{level}</span>
-            </div>
-          ))}
+        {/* Languages */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 bg-gray-50 p-2 border-l-4 border-blue-600">
+            LANGUAGES
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            {Object.entries(cvData?.personal_info?.languages || {}).map(([lang, level], index) => (
+              <div key={index} className="bg-gray-50 px-4 py-2 rounded">
+                <span className="font-semibold text-gray-700">{lang}: </span>
+                <span className="text-gray-600">{level}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
