@@ -122,7 +122,7 @@ export default function JobMatches() {
                   onClick={() => setSelectedRole(selectedRole === index ? null : index)}
                   className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <span className="font-medium">{roleData.job_title}</span>
+                  <span className="font-medium text-green-700">{roleData.job_title}</span>
                   {selectedRole === index ? (
                     <ChevronUpIcon className="h-5 w-5 text-gray-500" />
                   ) : (
@@ -142,13 +142,13 @@ export default function JobMatches() {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                              className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-5"
                             >
                               {link.location} <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                             </a>
                           ))
                         ) : (
-                          <a href={links} target="_blank" className="text-blue-600 hover:text-blue-800 text-sm">
+                          <a href={links} target="_blank" className="text-blue-600 hover:text-blue-800 text-sm pl-5">
                             View Jobs
                           </a>
                         )}
