@@ -90,7 +90,7 @@
 ## How to Run the Project
 ### 1. Clone the Repository
 ```sh
-   git clone https://github.com/your-repo/icareer.git
+   git clone git@github.com:HAMZAELALOUI/cover-generator.git
    cd icareer
 ```
 ### 2. Set Up Backend (Django)
@@ -115,7 +115,5 @@ DJANGO_SECRET_KEY=your-secret-key
 ```
 
 ## Contributors
-- **Your Name** (@yourGithubUsername)
+- **Hamza El Aloui** (@HAMZAELALOUI)
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
