@@ -30,7 +30,12 @@ SECRET_KEY = "django-insecure-#et6b(qz*=@cv8ah8j2rabc)b2tx023_p8a5u^(#f(y%gr64%p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+ 
+    "cover-generator-9.onrender.com",  # Your Render domain
+    "localhost",  # Allow local testing
+    "127.0.0.1",  # Allow local testing
+]
 
 
 # Application definition
