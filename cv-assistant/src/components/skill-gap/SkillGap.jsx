@@ -67,7 +67,7 @@ export default function SkillGap() {
         job_analysis: jobDescription  // Send raw job description instead of analyzed data
       });
 
-      const response = await fetch('http://127.0.0.1:8000/api/analyze-gap/', {
+      const response = await fetch('https://cover-generator-9.onrender.com/api/analyze-gap/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ export default function Dashboard() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/api/cv-extract/', {
+      const response = await fetch('http://localhost:8000/api/generate-cover-letter/cv-extract/', {
         method: 'POST',
         body: formData,
       });

@@ -11,7 +11,7 @@ export default function Generator({ onGenerate }) {
   const generateCoverLetter = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/generate-cover-letter/', {
+      const response = await fetch('https://cover-generator-9.onrender.com/api', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
