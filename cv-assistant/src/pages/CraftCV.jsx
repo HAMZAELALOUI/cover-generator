@@ -122,7 +122,7 @@ export default function CraftCV() {
       const formData = new FormData();
       formData.append('file', currentFile);
 
-      const extractResponse = await fetch('http://127.0.0.1:8000/api/extract-cv/', {
+      const extractResponse = await fetch('https://cover-generator-9.onrender.com/api/extract-cv/', {
         method: 'POST',
         body: formData,
       });
@@ -137,7 +137,7 @@ export default function CraftCV() {
       // Step 2: Craft CV with Job Description
       setStatus({ step: 'job', message: 'Crafting CV...' });
       
-      const craftResponse = await fetch('http://127.0.0.1:8000/api/craft-cv/', {
+      const craftResponse = await fetch('https://cover-generator-9.onrender.com/api/craft-cv/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
