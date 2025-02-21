@@ -60,6 +60,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://cover-generator-bay.vercel.app",
+]
+
 ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
